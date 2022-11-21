@@ -342,6 +342,12 @@ func (handler *UnroutedHandler) PostFile(w http.ResponseWriter, r *http.Request)
 	// Parse metadata
 	meta := ParseMetadataHeader(r.Header.Get("Upload-Metadata"))
 
+	id, errID := extractIDFromPath(r.URL.Path)
+	if errID != nil {
+		handler.sendError(w, r, err)
+		return
+	}
+
 	info := FileInfo{
 		Size:           size,
 		SizeIsDeferred: sizeIsDeferred,
@@ -349,6 +355,7 @@ func (handler *UnroutedHandler) PostFile(w http.ResponseWriter, r *http.Request)
 		IsPartial:      isPartial,
 		IsFinal:        isFinal,
 		PartialUploads: partialUploadIDs,
+		ID:             id,
 	}
 
 	if handler.config.PreUploadCreateCallback != nil {
@@ -369,8 +376,6 @@ func (handler *UnroutedHandler) PostFile(w http.ResponseWriter, r *http.Request)
 		handler.sendError(w, r, err)
 		return
 	}
-
-	id := info.ID
 
 	// Add the Location header directly after creating the new resource to even
 	// include it in cases of failure when an error is returned
