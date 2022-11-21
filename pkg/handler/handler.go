@@ -38,6 +38,7 @@ func NewHandler(config Config) (*Handler, error) {
 	routedHandler.Handler = handler.Middleware(mux)
 
 	mux.Post("", http.HandlerFunc(handler.PostFile))
+	mux.Post(":id", http.HandlerFunc(handler.PostFile))
 	mux.Head(":id", http.HandlerFunc(handler.HeadFile))
 	mux.Add("PATCH", ":id", http.HandlerFunc(handler.PatchFile))
 	if !config.DisableDownload {
